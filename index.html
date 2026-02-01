@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Competencias Digitales - Marco Europeo DigComp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .option-card.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    
+    <!-- Pantalla de Inicio -->
+    <div id="welcomeScreen" class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 fade-in">
+            <!-- Logotipo Afundación -->
+            <div class="flex justify-center mb-8">
+                <img src="logo_afundacion_transp.png" alt="Afundación Obra Social ABANCA" class="h-16 md:h-20">
+            </div>
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold text-indigo-900 mb-4">
+                    Evalúa tus Competencias Digitales
+                </h1>
+                <div class="w-24 h-1 bg-indigo-500 mx-auto mb-6"></div>
+                <p class="text-lg text-gray-700 mb-6">
+                    Con este sencillo test en 5 minutos podrás descubrir el curso de Afundación que 
+                    mejor se adapta a tus necesidades.
+                </p>
+            </div>
+
+            <div class="bg-indigo-50 rounded-xl p-6 mb-8">
+                <h2 class="text-xl font-semibold text-indigo-900 mb-4">
+                    📚 Marco Europeo de Competencias Digitales (DigComp)
+                </h2>
+                <p class="text-gray-700 mb-4">Este test está basado en las siguientes áreas de competencia:</p>
+                <ul class="space-y-2 text-gray-700">
+                    <li class="flex items-start">
+                        <span class="text-indigo-600 mr-2">1️⃣</span>
+                        <span><strong>Información y alfabetización digital</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-indigo-600 mr-2">2️⃣</span>
+                        <span><strong>Creación de contenidos digitales</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-indigo-600 mr-2">3️⃣</span>
+                        <span><strong>Comunicación y colaboración online</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-indigo-600 mr-2">4️⃣</span>
+                        <span><strong>Seguridad en la red</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-indigo-600 mr-2">5️⃣</span>
+                        <span><strong>Resolución de problemas</strong></span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="text-center">
+                <button onclick="startTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                    🚀 Comenzar el Test
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Test -->
+    <div id="testScreen" class="container mx-auto px-4 py-8 max-w-4xl hidden">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10">
+            <!-- Logotipo Afundación -->
+            <div class="flex justify-center mb-6">
+                <img src="logo_afundacion_transp.png" alt="Afundación Obra Social ABANCA" class="h-12 md:h-16">
+            </div>
+            <!-- Barra de progreso -->
+            <div class="mb-8">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Pregunta <span id="currentQuestion">1</span> de <span id="totalQuestions">15</span></span>
+                    <span id="progressPercent">7%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="progressBar" class="progress-bar bg-indigo-600 h-3 rounded-full" style="width: 7%"></div>
+                </div>
+            </div>
+
+            <!-- Área de competencia -->
+            <div id="competenceArea" class="inline-block bg-indigo-100 text-indigo-800 px-4 py-2 rounded-full text-sm font-semibold mb-4"></div>
+
+            <!-- Pregunta -->
+            <h2 id="questionText" class="text-2xl md:text-3xl font-bold text-gray-800 mb-8"></h2>
+
+            <!-- Opciones de respuesta -->
+            <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Las opciones se generarán dinámicamente -->
+            </div>
+
+            <!-- Botones de navegación -->
+            <div class="flex justify-between mt-8">
+                <button id="prevBtn" onclick="previousQuestion()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    ← Anterior
+                </button>
+                <button id="nextBtn" onclick="nextQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Siguiente →
+                </button>
+                <button id="finishBtn" onclick="finishTest()" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg transition-all hidden">
+                    ✓ Finalizar Test
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Resultados -->
+    <div id="resultsScreen" class="container mx-auto px-4 py-8 max-w-6xl hidden">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 fade-in">
+            <!-- Logotipo Afundación -->
+            <div class="flex justify-center mb-8">
+                <img src="logo_afundacion_transp.png" alt="Afundación Obra Social ABANCA" class="h-16 md:h-20">
+            </div>
+            <div class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-bold text-indigo-900 mb-4">
+                    🎉 Resultados de tu Test
+                </h1>
+                <div class="w-24 h-1 bg-indigo-500 mx-auto mb-4"></div>
+                <p class="text-xl text-gray-700">Aquí tienes tu evaluación de competencias digitales</p>
+            </div>
+
+            <!-- Puntuación por áreas -->
+            <div class="mb-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">📊 Puntuación por Áreas de Competencia</h2>
+                <div id="competenceScores" class="space-y-4">
+                    <!-- Los resultados se generarán dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Puntuación total -->
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white text-center mb-10">
+                <h3 class="text-2xl font-bold mb-2">Puntuación Total</h3>
+                <p id="totalScore" class="text-6xl font-bold"></p>
+                <p id="levelDescription" class="text-xl mt-4"></p>
+            </div>
+
+            <!-- Cursos recomendados -->
+            <div class="mb-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">🎓 Cursos Recomendados para Ti</h2>
+                <div id="recommendedCourses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Los cursos se generarán dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Botón para repetir -->
+            <div class="text-center">
+                <button onclick="resetTest()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all">
+                    🔄 Repetir Test
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración del test
+        const questions = [
+            // Área 1: Información y alfabetización digital
+            {
+                area: "Información y alfabetización digital",
+                question: "¿Con qué frecuencia utilizas el móvil para buscar información en Internet?",
+                options: [
+                    { text: "Nunca o casi nunca", value: 0, icon: "❌", color: "red" },
+                    { text: "A veces, con ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Con frecuencia, de forma autónoma", value: 2, icon: "👍", color: "green" },
+                    { text: "Diariamente y sin dificultades", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Información y alfabetización digital",
+                question: "¿Sabes distinguir información fiable de información falsa (fake news) en Internet?",
+                options: [
+                    { text: "No, no sé cómo hacerlo", value: 0, icon: "❌", color: "red" },
+                    { text: "A veces, pero tengo dudas", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Normalmente sí, utilizo varias fuentes", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y ayudo a otros a identificarlas", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Información y alfabetización digital",
+                question: "¿Sabes descargar y guardar archivos (fotos, documentos) en tu móvil u ordenador?",
+                options: [
+                    { text: "No sé hacerlo", value: 0, icon: "❌", color: "red" },
+                    { text: "Alguna vez, con ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, lo hago con cierta facilidad", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y organizo bien mis archivos", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+
+            // Área 2: Creación de contenidos digitales
+            {
+                area: "Creación de contenidos digitales",
+                question: "¿Sabes editar o crear documentos de texto, imágenes o vídeos en tu dispositivo?",
+                options: [
+                    { text: "No, nunca lo he hecho", value: 0, icon: "❌", color: "red" },
+                    { text: "Lo he hecho alguna vez con ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, edito documentos e imágenes básicas", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, me siento cómodo creando diversos contenidos", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Creación de contenidos digitales",
+                question: "¿Sabes compartir fotos o vídeos en las redes sociales?",
+                options: [
+                    { text: "No sé hacerlo", value: 0, icon: "❌", color: "red" },
+                    { text: "Solo si alguien me ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, lo hago regularmente", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y ajusto la privacidad", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Creación de contenidos digitales",
+                question: "¿Utilizas aplicaciones de edición de fotos o herramientas creativas?",
+                options: [
+                    { text: "Nunca las he utilizado", value: 0, icon: "❌", color: "red" },
+                    { text: "Las he probado, pero me cuesta", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, uso algunas aplicaciones básicas", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, uso varias herramientas avanzadas", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+
+            // Área 3: Comunicación y colaboración online
+            {
+                area: "Comunicación y colaboración online",
+                question: "¿Utilizas WhatsApp u otras aplicaciones de mensajería?",
+                options: [
+                    { text: "No, no las utilizo", value: 0, icon: "❌", color: "red" },
+                    { text: "Sí, pero solo para recibir mensajes", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, para conversaciones y enviar mensajes", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, uso todas las funciones (grupos, llamadas, etc.)", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Comunicación y colaboración online",
+                question: "¿Participas en videollamadas (Zoom, Teams, Google Meet...)?",
+                options: [
+                    { text: "Nunca he participado", value: 0, icon: "❌", color: "red" },
+                    { text: "Alguna vez con ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, me uno sin problemas", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, organizo y gestiono videollamadas", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Comunicación y colaboración online",
+                question: "¿Utilizas el correo electrónico para comunicarte?",
+                options: [
+                    { text: "No tengo o no lo utilizo", value: 0, icon: "❌", color: "red" },
+                    { text: "Lo tengo pero me cuesta usarlo", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, envío y leo correos regularmente", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, con adjuntos y organización", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+
+            // Área 4: Seguridad en la red
+            {
+                area: "Seguridad en la red",
+                question: "¿Utilizas contraseñas fuertes y diferentes para tus cuentas?",
+                options: [
+                    { text: "No, utilizo contraseñas simples", value: 0, icon: "❌", color: "red" },
+                    { text: "A veces, pero las repito", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, uso contraseñas diferentes", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y uso gestor de contraseñas", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Seguridad en la red",
+                question: "¿Sabes identificar correos electrónicos o mensajes fraudulentos (phishing)?",
+                options: [
+                    { text: "No sé qué es eso", value: 0, icon: "❌", color: "red" },
+                    { text: "He oído hablar pero no sé identificarlos", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, normalmente los identifico", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y sé cómo reportarlos", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Seguridad en la red",
+                question: "¿Tienes cuidado con la información personal que compartes en Internet?",
+                options: [
+                    { text: "No, comparto sin pensar", value: 0, icon: "❌", color: "red" },
+                    { text: "A veces pienso en eso", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, evito compartir datos sensibles", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y gestiono bien mi privacidad", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+
+            // Área 5: Resolución de problemas
+            {
+                area: "Resolución de problemas",
+                question: "Cuando tienes un problema con tu móvil u ordenador, ¿qué haces?",
+                options: [
+                    { text: "No hago nada, pido ayuda inmediata", value: 0, icon: "❌", color: "red" },
+                    { text: "Intento una solución básica y pido ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Busco soluciones en Internet", value: 2, icon: "👍", color: "green" },
+                    { text: "Resuelvo problemas de forma autónoma", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Resolución de problemas",
+                question: "¿Realizas trámites con la administración pública en Internet (cita médica, impuestos...)?",
+                options: [
+                    { text: "Nunca, siempre voy en persona", value: 0, icon: "❌", color: "red" },
+                    { text: "Lo he intentado pero necesito ayuda", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, hago algunos trámites online", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, hago casi todos los trámites online", value: 3, icon: "⭐", color: "blue" }
+                ]
+            },
+            {
+                area: "Resolución de problemas",
+                question: "¿Instalas y descargas nuevas aplicaciones en tu móvil?",
+                options: [
+                    { text: "No, nunca lo he hecho", value: 0, icon: "❌", color: "red" },
+                    { text: "Sí, pero necesito ayuda siempre", value: 1, icon: "🤔", color: "yellow" },
+                    { text: "Sí, descargo apps sin problemas", value: 2, icon: "👍", color: "green" },
+                    { text: "Sí, y gestiono las apps regularmente", value: 3, icon: "⭐", color: "blue" }
+                ]
+            }
+        ];
+
+        // Cursos disponibles
+        const courses = [
+            {
+                name: "Teléfonos móviles iOS: empezando desde cero",
+                url: "https://aulavirtual.afundacion.org/producto/empezando_desde_cero/",
+                level: "básico",
+                areas: ["Información y alfabetización digital", "Resolución de problemas"],
+                minScore: 0,
+                maxScore: 15
+            },
+            {
+                name: "Teléfonos móviles Android: empezando desde cero",
+                url: "https://aulavirtual.afundacion.org/producto/telefono-movil-android-empezando-desde-cero/",
+                level: "básico",
+                areas: ["Información y alfabetización digital", "Resolución de problemas"],
+                minScore: 0,
+                maxScore: 15
+            },
+            {
+                name: "Tu día a día con el móvil Android: tu mejor aliado",
+                url: "https://aulavirtual.afundacion.org/producto/tu-dia-a-dia-con-el-movil-android-tu-mejor-aliado/",
+                level: "intermedio",
+                areas: ["Comunicación y colaboración online", "Resolución de problemas"],
+                minScore: 12,
+                maxScore: 30
+            },
+            {
+                name: "Tu día a día con el móvil iOS: tu mejor aliado",
+                url: "https://aulavirtual.afundacion.org/producto/tu-dia-a-dia-con-el-movil-ios/",
+                level: "intermedio",
+                areas: ["Comunicación y colaboración online", "Resolución de problemas"],
+                minScore: 12,
+                maxScore: 30
+            },
+            {
+                name: "Aplicaciones Android de ocio y bienestar",
+                url: "https://aulavirtual.afundacion.org/producto/aplicaciones-android-de-ocio-y-bienestar/",
+                level: "intermedio",
+                areas: ["Creación de contenidos digitales", "Comunicación y colaboración online"],
+                minScore: 15,
+                maxScore: 35
+            },
+            {
+                name: "Aplicaciones iOS de ocio y bienestar",
+                url: "https://aulavirtual.afundacion.org/producto/aplicaciones-ios-de-ocio-y-bienestar/",
+                level: "intermedio",
+                areas: ["Creación de contenidos digitales", "Comunicación y colaboración online"],
+                minScore: 15,
+                maxScore: 35
+            },
+            {
+                name: "Trámites con la administración para iOS y Android",
+                url: "https://aulavirtual.afundacion.org/producto/tramites-con-la-administracion-para-ios-y-android/",
+                level: "intermedio",
+                areas: ["Resolución de problemas", "Seguridad en la red"],
+                minScore: 18,
+                maxScore: 40
+            },
+            {
+                name: "WhatsApp y otras redes sociales para iOS",
+                url: "https://aulavirtual.afundacion.org/producto/whatsapp-y-otras-redes-sociales-para-ios/",
+                level: "intermedio",
+                areas: ["Comunicación y colaboración online", "Seguridad en la red"],
+                minScore: 10,
+                maxScore: 30
+            },
+            {
+                name: "WhatsApp y otras redes sociales para Android",
+                url: "https://aulavirtual.afundacion.org/producto/whatsapp-y-otras-redes-sociales-para-android/",
+                level: "intermedio",
+                areas: ["Comunicación y colaboración online", "Seguridad en la red"],
+                minScore: 10,
+                maxScore: 30
+            },
+            {
+                name: "Ciberseguridad",
+                url: "https://aulavirtual.afundacion.org/producto/ciberseguridad/",
+                level: "intermedio",
+                areas: ["Seguridad en la red"],
+                minScore: 0,
+                maxScore: 45
+            },
+            {
+                name: "Recomendaciones de la policía",
+                url: "https://aulavirtual.afundacion.org/producto/recomendaciones-de-la-policia/",
+                level: "todos",
+                areas: ["Seguridad en la red"],
+                minScore: 0,
+                maxScore: 45
+            },
+            {
+                name: "Aprende a utilizar la banca móvil y los cajeros de Abanca",
+                url: "https://aulavirtual.afundacion.org/producto/aprende-a-utilizar-la-banca-movil-de-abanca/",
+                level: "intermedio",
+                areas: ["Resolución de problemas", "Seguridad en la red"],
+                minScore: 15,
+                maxScore: 40
+            },
+            {
+                name: "Chat GPT",
+                url: "https://aulavirtual.afundacion.org/producto/aprende-a-utilizar-los-cajeros-de-abanca/",
+                level: "avanzado",
+                areas: ["Creación de contenidos digitales", "Resolución de problemas"],
+                minScore: 25,
+                maxScore: 45
+            }
+        ];
+
+        // Estado del test
+        let currentQuestionIndex = 0;
+        let answers = new Array(questions.length).fill(null);
+
+        // Funciones principales
+        function startTest() {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('testScreen').classList.remove('hidden');
+            document.getElementById('totalQuestions').textContent = questions.length;
+            showQuestion(0);
+        }
+
+        function showQuestion(index) {
+            currentQuestionIndex = index;
+            const question = questions[index];
+            
+            // Actualizar área de competencia
+            document.getElementById('competenceArea').textContent = question.area;
+            
+            // Actualizar texto de pregunta
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Actualizar progreso
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('currentQuestion').textContent = index + 1;
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+            
+            // Generar opciones
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, optIndex) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = `option-card border-2 border-gray-200 rounded-xl p-6 ${answers[index] === optIndex ? 'selected' : ''}`;
+                optionDiv.onclick = () => selectOption(index, optIndex);
+                
+                const colorClasses = {
+                    red: 'bg-red-100',
+                    yellow: 'bg-yellow-100',
+                    green: 'bg-green-100',
+                    blue: 'bg-blue-100'
+                };
+                
+                optionDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="text-4xl mr-4 ${colorClasses[option.color]} rounded-full w-16 h-16 flex items-center justify-center">
+                            ${option.icon}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-lg font-semibold text-gray-800">${option.text}</p>
+                        </div>
+                    </div>
+                `;
+                
+                optionsContainer.appendChild(optionDiv);
+            });
+            
+            // Actualizar botones
+            document.getElementById('prevBtn').disabled = index === 0;
+            
+            const isLastQuestion = index === questions.length - 1;
+            if (isLastQuestion) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('finishBtn').classList.remove('hidden');
+                document.getElementById('finishBtn').disabled = answers[index] === null;
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('finishBtn').classList.add('hidden');
+                document.getElementById('nextBtn').disabled = answers[index] === null;
+            }
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            answers[questionIndex] = optionIndex;
+            
+            // Actualizar visualización
+            const options = document.querySelectorAll('.option-card');
+            options.forEach((opt, idx) => {
+                if (idx === optionIndex) {
+                    opt.classList.add('selected');
+                } else {
+                    opt.classList.remove('selected');
+                }
+            });
+            
+            // Habilitar botón siguiente/finalizar
+            const isLastQuestion = questionIndex === questions.length - 1;
+            if (isLastQuestion) {
+                document.getElementById('finishBtn').disabled = false;
+            } else {
+                document.getElementById('nextBtn').disabled = false;
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                showQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function finishTest() {
+            calculateResults();
+            document.getElementById('testScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+        }
+
+        function calculateResults() {
+            // Calcular puntuación por área
+            const areaScores = {};
+            const areaMaxScores = {};
+            
+            questions.forEach((q, index) => {
+                if (!areaScores[q.area]) {
+                    areaScores[q.area] = 0;
+                    areaMaxScores[q.area] = 0;
+                }
+                const selectedOption = q.options[answers[index]];
+                areaScores[q.area] += selectedOption.value;
+                areaMaxScores[q.area] += 3; // Máximo por pregunta
+            });
+            
+            // Calcular puntuación total
+            const totalScore = Object.values(areaScores).reduce((a, b) => a + b, 0);
+            const maxScore = questions.length * 3;
+            const percentage = (totalScore / maxScore) * 100;
+            
+            // Mostrar puntuaciones por área
+            const scoresContainer = document.getElementById('competenceScores');
+            scoresContainer.innerHTML = '';
+            
+            Object.keys(areaScores).forEach(area => {
+                const score = areaScores[area];
+                const maxAreaScore = areaMaxScores[area];
+                const areaPercentage = (score / maxAreaScore) * 100;
+                
+                const scoreDiv = document.createElement('div');
+                scoreDiv.className = 'bg-gray-50 rounded-lg p-4';
+                scoreDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-semibold text-gray-800">${area}</h3>
+                        <span class="text-lg font-bold text-indigo-600">${score}/${maxAreaScore}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="bg-indigo-600 h-3 rounded-full transition-all" style="width: ${areaPercentage}%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">${Math.round(areaPercentage)}% de competencia</p>
+                `;
+                scoresContainer.appendChild(scoreDiv);
+            });
+            
+            // Mostrar puntuación total
+            document.getElementById('totalScore').textContent = `${totalScore}/${maxScore}`;
+            
+            // Descripción del nivel
+            let levelText = '';
+            if (percentage < 33) {
+                levelText = '🌱 Nivel Inicial - Comienzas a explorar el mundo digital';
+            } else if (percentage < 66) {
+                levelText = '📚 Nivel Intermedio - Tienes una base sólida';
+            } else {
+                levelText = '🚀 Nivel Avanzado - Dominas las competencias digitales';
+            }
+            document.getElementById('levelDescription').textContent = levelText;
+            
+            // Recomendar cursos
+            recommendCourses(totalScore, areaScores);
+        }
+
+        function recommendCourses(totalScore, areaScores) {
+            const coursesContainer = document.getElementById('recommendedCourses');
+            coursesContainer.innerHTML = '';
+            
+            // Encontrar áreas con menor puntuación
+            const sortedAreas = Object.entries(areaScores).sort((a, b) => a[1] - b[1]);
+            const weakestAreas = sortedAreas.slice(0, 2).map(a => a[0]);
+            
+            // Filtrar y ordenar cursos
+            let recommendedCourses = courses.filter(course => {
+                // El curso está en el rango de puntuación
+                const inScoreRange = totalScore >= course.minScore && totalScore <= course.maxScore;
+                
+                // El curso cubre alguna de las áreas débiles
+                const coversWeakArea = course.areas.some(area => weakestAreas.includes(area));
+                
+                return inScoreRange || coversWeakArea;
+            });
+            
+            // Si hay menos de 3 cursos, agregar algunos generales
+            if (recommendedCourses.length < 3) {
+                const additionalCourses = courses.filter(c => 
+                    !recommendedCourses.includes(c) && c.level === 'todos'
+                );
+                recommendedCourses = [...recommendedCourses, ...additionalCourses];
+            }
+            
+            // Limitar a 6 cursos
+            recommendedCourses = recommendedCourses.slice(0, 6);
+            
+            // Mostrar cursos
+            recommendedCourses.forEach(course => {
+                const courseDiv = document.createElement('div');
+                courseDiv.className = 'bg-white border-2 border-indigo-200 rounded-xl p-6 hover:shadow-lg transition-all';
+                
+                const levelBadges = {
+                    'básico': 'bg-green-100 text-green-800',
+                    'intermedio': 'bg-blue-100 text-blue-800',
+                    'avanzado': 'bg-purple-100 text-purple-800',
+                    'todos': 'bg-gray-100 text-gray-800'
+                };
+                
+                courseDiv.innerHTML = `
+                    <span class="inline-block px-3 py-1 ${levelBadges[course.level]} text-xs font-semibold rounded-full mb-3">
+                        ${course.level.toUpperCase()}
+                    </span>
+                    <h3 class="font-bold text-gray-800 mb-3 min-h-[3rem]">${course.name}</h3>
+                    <a href="${course.url}" target="_blank" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all text-sm">
+                        Acceder al Curso →
+                    </a>
+                `;
+                
+                coursesContainer.appendChild(courseDiv);
+            });
+        }
+
+        function resetTest() {
+            currentQuestionIndex = 0;
+            answers = new Array(questions.length).fill(null);
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
